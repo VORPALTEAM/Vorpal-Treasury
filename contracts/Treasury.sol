@@ -16,16 +16,18 @@ contract Treasury is ITreasury, AccessControl {
 
     IERC20 public vorpal;
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
+    
 
     // Address is equal to zero
     error ZeroAddress();
 
     constructor() {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(OPERATOR_ROLE, msg.sender);
     }
 
     /// @notice Sets up Vorpal token
-    function setVorpal(address _vorpal) external {
+    function setVorpal(address _vorpal) external onlyRole(OPERATOR_ROLE){
         if(_vorpal == address(0)){
             revert ZeroAddress();
         }
@@ -33,7 +35,7 @@ contract Treasury is ITreasury, AccessControl {
     }  
 
     /// @notice Transfers tokens to an address
-    function transfer(address to, uint256 value) external returns (bool) {
+    function transfer(address to, uint256 value) external onlyRole(OPERATOR_ROLE) returns (bool) {
         vorpal.safeTransfer(to, value);
         return true;
     }
